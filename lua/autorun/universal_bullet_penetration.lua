@@ -2,6 +2,7 @@ local enabled = CreateConVar("ubp_enabled", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}
 local matCoeff = CreateConVar("ubp_mat_coeff", 2000, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "The factor to divide a material's density by")
 local damageCoeff = CreateConVar("ubp_damage_coeff", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "The factor to multiply a bullet's damage by")
 local doShotguns = CreateConVar("ubp_shotguns", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether to apply penetration to shotguns (or other weapons that fire more than one bullet at a time)")
+local doAlive = CreateConVar("ubp_alive", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether bullets can penetrate through living things (players and NPC's)")
 
 local STEP_SIZE = 4
 
@@ -10,6 +11,9 @@ local function runCallback(attacker, tr, dmginfo)
 	local mat = util.GetSurfaceData(tr.SurfaceProps).density / matCoeff:GetFloat()
 
 	local dist = dmginfo:GetDamage() / mat * damageCoeff:GetFloat()
+	if not doAlive:GetBool() and (ent:IsPlayer() or ent:IsNPC()) then
+		return
+	end
 
 	local start = tr.HitPos
 	local dir = tr.Normal
