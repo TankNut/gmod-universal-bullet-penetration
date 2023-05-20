@@ -162,3 +162,26 @@ hook.Add("EntityFireBullets", "ubp", function(ent, bullet)
 
 	return true
 end)
+
+if CLIENT then
+	hook.Add("PopulateToolMenu", "ubp", function()
+		spawnmenu.AddToolMenuOption("Options", "Universal Bullet Penetration", "ubp", "Options", "", "", function(pnl)
+			pnl:ClearControls()
+			pnl:Help("These settings can only be changed in singleplayer or by the person who created the game server through the main menu.")
+
+			pnl:CheckBox("Enabled", "ubp_enabled")
+
+			pnl:Help("Higher values let bullets penetrate through thicker materials and retain more energy/damage when they exit.")
+			pnl:NumSlider("Material multiplier", "ubp_penetration_multiplier", 0, 10, 1)
+
+			pnl:Help("Higher values let bullets keep more of their damage after penetration.")
+			pnl:NumSlider("Damage multiplier", "ubp_damage_multiplier", 0, 1, 1)
+
+			pnl:Help("Whether bullets are able to penetrate through players or NPC's.")
+			pnl:CheckBox("Penetrate living things", "ubp_alive")
+
+			pnl:Help("Shotguns require some extra changes to work correctly with penetration, these changes may break other addons.")
+			pnl:CheckBox("Enable on shotguns", "ubp_shotguns")
+		end)
+	end)
+end
