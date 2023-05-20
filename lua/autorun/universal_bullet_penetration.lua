@@ -1,6 +1,8 @@
 local enabled = CreateConVar("ubp_enabled", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Is penetration enabled?", 0, 1)
-local matCoeff = CreateConVar("ubp_mat_coeff", 2000, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "The factor to divide a material's density by")
-local damageCoeff = CreateConVar("ubp_damage_coeff", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "The factor to multiply a bullet's damage by")
+
+local penMult = CreateConVar("ubp_penetration_multiplier", 2, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "A multiplier for how hard a bullet penetrates through materials")
+local dmgMult = CreateConVar("ubp_damage_multiplier", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "A multiplier for how much damage is lost after penetration")
+
 local doShotguns = CreateConVar("ubp_shotguns", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether to apply penetration to shotguns (or other weapons that fire more than one bullet at a time)")
 local doAlive = CreateConVar("ubp_alive", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether bullets can penetrate through living things (players and NPC's)")
 
@@ -8,12 +10,14 @@ local STEP_SIZE = 4
 
 local function runCallback(attacker, tr, dmginfo)
 	local ent = tr.Entity
-	local mat = util.GetSurfaceData(tr.SurfaceProps).density / matCoeff:GetFloat()
 
-	local dist = dmginfo:GetDamage() / mat * damageCoeff:GetFloat()
 	if not doAlive:GetBool() and (ent:IsPlayer() or ent:IsNPC()) then
 		return
 	end
+
+	local mat = util.GetSurfaceData(tr.SurfaceProps).density / 1000
+
+	local dist = (dmginfo:GetDamage() / mat) * penMult:GetFloat()
 
 	local start = tr.HitPos
 	local dir = tr.Normal
@@ -64,7 +68,7 @@ local function runCallback(attacker, tr, dmginfo)
 		local finalDist = start:Distance(trace.HitPos)
 		local ratio = 1 - (finalDist / dist)
 
-		local damage = dmginfo:GetDamage() * ratio
+		local damage = dmginfo:GetDamage() * ratio * dmgMult:GetFloat()
 
 		if damage <= 1 then
 			return
@@ -134,9 +138,7 @@ hook.Add("EntityFireBullets", "ubp", function(ent, bullet)
 			runCallback(attacker, tr, dmginfo)
 		end
 	else
-		bullet.Callback = function(attacker, tr, dmginfo)
-			runCallback(attacker, tr, dmginfo)
-		end
+		bullet.Callback = runCallback
 	end
 
 	-- Callbacks are unreliable with bullets with .Num > 1 so we force them into manual mode
