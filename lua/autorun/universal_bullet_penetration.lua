@@ -15,7 +15,8 @@ local function runCallback(attacker, tr, dmginfo)
 		return
 	end
 
-	local mat = util.GetSurfaceData(tr.SurfaceProps).density / 1000
+	local surf = util.GetSurfaceData(tr.SurfaceProps)
+	local mat = surf and surf.density / 1000 or 1
 
 	local dist = (dmginfo:GetDamage() / mat) * penMult:GetFloat()
 
