@@ -86,13 +86,16 @@ local function runCallback(attacker, tr, dmginfo)
 
 		util.Effect("Impact", effect, false)
 
+		local ignore = ent:IsRagdoll() and ent or NULL
+
 		attacker:FireBullets({
 			Num = 1,
 			Src = trace.HitPos + dir,
 			Dir = dir,
 			Damage = damage,
 			Spread = vector_origin,
-			Tracer = 0
+			Tracer = 0,
+			IgnoreEntity = ignore
 		})
 	end
 end
