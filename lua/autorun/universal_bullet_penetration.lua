@@ -141,9 +141,14 @@ hook.Add("EntityFireBullets", "ubp", function(ent, bullet)
 	end
 
 	if ent:IsPlayer() then
-		local weapon = ent:GetActiveWeapon():GetClass()
+		local weapon = ent:GetActiveWeapon()
+		local class = weapon:GetClass()
 
-		if compatMW:GetBool() and weapons.IsBasedOn(weapon, "mg_base") then return end
+		if weapon.UBPDisable then
+			return
+		end
+
+		if compatMW:GetBool() and weapons.IsBasedOn(class, "mg_base") then return end
 	end
 
 	if bullet.Callback then
