@@ -6,6 +6,8 @@ local dmgMult = CreateConVar("ubp_damage_multiplier", 1, {FCVAR_ARCHIVE, FCVAR_R
 local doShotguns = CreateConVar("ubp_shotguns", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether to apply penetration to shotguns (or other weapons that fire more than one bullet at a time)", 0, 1)
 local doAlive = CreateConVar("ubp_alive", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether bullets can penetrate through living things (players and NPC's)", 0, 1)
 
+local compatMW = CreateConVar("ubp_compat_mw", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Enables compatibility mode for Modern Warfare Base weapons (by ignoring them)", 0, 1)
+
 local STEP_SIZE = 4
 
 local function runCallback(attacker, tr, dmginfo)
@@ -136,6 +138,12 @@ end
 hook.Add("EntityFireBullets", "ubp", function(ent, bullet)
 	if not enabled:GetBool() then
 		return
+	end
+
+	if ent:IsPlayer() then
+		local weapon = ent:GetActiveWeapon():GetClass()
+
+		if compatMW:GetBool() and weapons.IsBasedOn(weapon, "mg_base") then return end
 	end
 
 	if bullet.Callback then
