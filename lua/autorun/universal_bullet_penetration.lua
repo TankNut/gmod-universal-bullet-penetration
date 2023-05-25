@@ -3,13 +3,17 @@ local enabled = CreateConVar("ubp_enabled", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}
 local penMult = CreateConVar("ubp_penetration_multiplier", 2, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "A multiplier for how hard a bullet penetrates through materials")
 local dmgMult = CreateConVar("ubp_damage_multiplier", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "A multiplier for how much damage is lost after penetration")
 
-local doShotguns = CreateConVar("ubp_shotguns", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether to apply penetration to shotguns (or other weapons that fire more than one bullet at a time)")
-local doAlive = CreateConVar("ubp_alive", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether bullets can penetrate through living things (players and NPC's)")
+local doShotguns = CreateConVar("ubp_shotguns", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether to apply penetration to shotguns (or other weapons that fire more than one bullet at a time)", 0, 1)
+local doAlive = CreateConVar("ubp_alive", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Whether bullets can penetrate through living things (players and NPC's)", 0, 1)
 
 local STEP_SIZE = 4
 
 local function runCallback(attacker, tr, dmginfo)
 	local ent = tr.Entity
+
+	if not tr.Hit or tr.StartSolid then
+		return
+	end
 
 	if not doAlive:GetBool() and (ent:IsPlayer() or ent:IsNPC()) then
 		return
